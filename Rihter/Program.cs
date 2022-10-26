@@ -1,7 +1,10 @@
 namespace Rihter
 {
-    // Объявление делегата; экземпляр ссылается на метод
-    // с параметром типа Int32, возвращающий значение void
+    /// <summary>
+    /// Объявление делегата; экземпляр ссылается на метод
+    /// с параметром типа Int32, возвращающий значение void
+    /// </summary>
+    /// <param name="value"></param>
     internal delegate void Feedback(Int32 value);
     public sealed class Program
     {
@@ -22,11 +25,27 @@ namespace Rihter
             Application.Run(new Form1());
         }
 
+        /// <summary>
+        /// Вызывает метод Counter, передавая в третьем параметре fb значение null.
+        /// В результате при обработке элементов не задействуется метод обратного вызова
+        /// </summary>
         private static void StaticDelegateDemo()
         {
             Console.WriteLine("----- Static Delegate Demo -----");
+            /*Вызывает метод Counter, передавая в третьем параметре fb значение null.
+              В результате при обработке элементов не задействуется метод обратного вызова*/
             Counter(1, 3, null);
+            /*
+             При втором вызове метода Counter методом StaticDelegateDemo третьему параметру передается только что созданный делегат Feedback. 
+             Этот делегат служит  оболочкой для другого метода, позволяя выполнить обратный вызов последнего косвенно, через оболочку. 
+             В рассматриваемом примере имя статического метода Program.FeedbackToConsole передается конструктору Feedback, указывая, 
+             что именно для него требуется создать оболочку.  
+            Возвращенная оператором new ссылка
+            передается третьему параметру метода Counter, который в процессе выполнения будет вызывать статический метод FeedbackToConsole. 
+            Последний же просто выводит на консоль строку с названием обрабатываемого элемента.*/
             Counter(1, 3, new Feedback(Program.FeedbackToConsole));
+
+            /**/
             Counter(1, 3, new Feedback(FeedbackToMsgBox)); // Префикс "Program."
                                                            // не обязателен
             Console.WriteLine();
@@ -73,6 +92,12 @@ namespace Rihter
             Counter(1, 2, fbChain);
         }
 
+        /// <summary>
+        /// Перебор целых чисел
+        /// </summary>
+        /// <param name="from">Параметр отвечающий за начальное значение диапозона целых чисел</param>
+        /// <param name="to">Параметр отвечающий за конечное значение диапозона целых чисел</param>
+        /// <param name="fb">Ссылка на делегат Feedback</param>
         private static void Counter(Int32 from, Int32 to, Feedback fb)
         {
             for (Int32 val = from; val <= to; val++)
@@ -83,6 +108,15 @@ namespace Rihter
             }
         }
 
+        /// <summary>
+        /// Метод FeedbackToConsole определен в типе Program как закрытый, но при этом может быть вызван методом Counter. Так как оба метода определены в пределах одного
+        ///типа, проблем с безопасностью не возникает.Но даже если бы метод Counter был
+        ///определен в другом типе, это не сказалось бы на работе коде.Другими словами,
+        ///если код одного типа вызывает посредством делегата закрытый член другого типа,
+        ///проблем с безопасностью или уровнем доступа не возникает, если делегат создан
+        ///в коде, имеющем нужный уровень доступа.
+        /// </summary>
+        /// <param name="value"></param>
         private static void FeedbackToConsole(Int32 value)
         {
             Console.WriteLine("Item=" + value);
